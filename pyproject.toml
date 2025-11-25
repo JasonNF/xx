@@ -1,0 +1,30 @@
+[project]
+name = "xiuxian-game"
+version = "1.0.0"
+description = "Telegram修仙游戏 - 完整版文字修仙RPG游戏"
+authors = [
+    { name = "EC-AI", email = "ec@ai.com" }
+]
+dependencies = [
+    "python-telegram-bot>=21.10",
+    "sqlalchemy>=2.0.36",
+    "alembic>=1.15.0",
+    "redis>=5.2.1",
+    "apscheduler>=3.10.4",
+    "pydantic>=2.10.5",
+    "pydantic-settings>=2.7.0",
+    "python-dotenv>=1.0.1",
+    "aiosqlite>=0.20.0",
+]
+readme = "README.md"
+requires-python = ">= 3.11"
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.metadata]
+allow-direct-references = true
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/bot"]
