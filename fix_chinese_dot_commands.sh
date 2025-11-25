@@ -296,14 +296,30 @@ CHINESE_CMD_LIST=(
 )
 
 count=0
+total=${#CHINESE_CMD_LIST[@]}
+processed=0
+
 for cmd in "${CHINESE_CMD_LIST[@]}"; do
-    if grep -r "CommandHandler(\"$cmd\"" "$HANDLERS_DIR" >/dev/null 2>&1; then
-        find "$HANDLERS_DIR" -name "*.py" -not -name "chinese_commands.py" -type f -exec sed -i "/CommandHandler(\"$cmd\"/d" {} \;
+    ((processed++))
+    echo -ne "  处理中... [$processed/$total]\r"
+
+    # 检查是否存在该命令
+    found=$(grep -r "CommandHandler(\"$cmd\"" "$HANDLERS_DIR" 2>/dev/null | grep -v chinese_commands.py | wc -l)
+
+    if [ "$found" -gt 0 ]; then
+        # 删除该命令
+        find "$HANDLERS_DIR" -name "*.py" -not -name "chinese_commands.py" -type f -exec sed -i "/CommandHandler(\"$cmd\"/d" {} \; 2>/dev/null || true
         ((count++))
     fi
 done
 
-echo -e "${GREEN}✓ 已移除 $count 个旧的中文CommandHandler${NC}"
+echo -ne "\n"
+
+if [ $count -eq 0 ]; then
+    echo -e "${BLUE}ℹ 没有需要移除的中文CommandHandler${NC}"
+else
+    echo -e "${GREEN}✓ 已移除 $count 个旧的中文CommandHandler${NC}"
+fi
 
 # 5. 修正权限
 echo ""
