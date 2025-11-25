@@ -61,7 +61,8 @@ check_root() {
 install_system_dependencies() {
     print_header "1. 安装系统依赖"
 
-    apt-get update -qq
+    # 更新软件源,忽略警告
+    apt-get update -qq 2>&1 | grep -v "Policy will reject signature" | grep -v "does not have a Release file" || true
     print_success "更新软件源"
 
     apt-get install -y -qq \
