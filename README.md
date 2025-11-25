@@ -4,7 +4,7 @@
 
 📜 一款完整的Telegram文字修仙RPG游戏
 
-[功能特性](#功能特性) • [快速开始](#快速开始) • [游戏系统](#游戏系统) • [开发文档](#开发文档)
+[功能特性](#功能特性) • [快速开始](#快速开始) • [生产部署](#生产部署) • [游戏系统](#游戏系统)
 
 </div>
 
@@ -101,6 +101,48 @@ python -m bot.main
 ```bash
 cd src
 python -m bot.main
+```
+
+---
+
+## 🚀 生产部署
+
+### 一键部署到Linux服务器
+
+```bash
+# 克隆项目
+git clone https://github.com/JasonNF/xx.git
+cd xx
+
+# 运行部署脚本 (需要root权限)
+sudo bash deploy.sh
+```
+
+**部署脚本会自动**:
+- ✅ 安装所有依赖 (Python, PostgreSQL, Redis)
+- ✅ 配置数据库和缓存
+- ✅ 创建systemd服务
+- ✅ 启动Bot
+
+**执行时间**: 5-10分钟
+
+### 部署文档
+
+- **[⚡ 3分钟快速部署](DEPLOY_NOW.md)** - 最快速的部署方式
+- **[📚 完整部署指南](PRODUCTION_DEPLOYMENT.md)** - 详细的生产环境部署
+- **[✅ 部署检查清单](DEPLOYMENT_CHECKLIST.md)** - 确保部署成功
+
+### 服务管理
+
+```bash
+# 查看状态
+systemctl status xiuxian-bot
+
+# 查看日志
+journalctl -u xiuxian-bot -f
+
+# 重启服务
+systemctl restart xiuxian-bot
 ```
 
 ---
