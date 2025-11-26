@@ -24,12 +24,11 @@ async def divine_sense_info_command(update: Update, context: ContextTypes.DEFAUL
         msg = "🔮 【神识信息】\n\n"
 
         # 判断是否觉醒神识
-        if player.realm in ["凡人", "炼气期"]:
+        from bot.models import RealmType
+        if player.realm in [RealmType.MORTAL, RealmType.QI_REFINING]:
             msg += "⚠️ 神识未觉醒\n\n"
             msg += "💡 筑基后方能觉醒神识\n"
-            msg += f"📊 当前境界：{player.realm}"
-            if player.realm == "炼气期":
-                msg += f" {player.level}层"
+            msg += f"📊 当前境界：{player.full_realm_name}"
             await update.message.reply_text(msg)
             return
 
@@ -90,7 +89,8 @@ async def train_divine_sense_command(update: Update, context: ContextTypes.DEFAU
             return
 
         # 检查境界
-        if player.realm in ["凡人", "炼气期"]:
+        from bot.models import RealmType
+        if player.realm in [RealmType.MORTAL, RealmType.QI_REFINING]:
             await update.message.reply_text("❌ 筑基后方能修炼神识")
             return
 

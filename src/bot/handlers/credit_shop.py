@@ -16,6 +16,7 @@ from bot.models import (
     CreditShopPurchase,
     PlayerCreditShopLimit,
     CreditType,
+    PlayerInventory,
 )
 from bot.services.player_service import PlayerService
 from bot.services.credit_service import CreditService
@@ -25,7 +26,7 @@ async def credit_shop_command(update: Update, context: ContextTypes.DEFAULT_TYPE
     """积分商城主菜单 - /积分商城 或 /商城"""
     user_id = update.effective_user.id
 
-    async for db in get_db():
+    async with get_db() as db:
         player = await PlayerService.get_player_by_telegram_id(db, user_id)
         if not player:
             await update.message.reply_text("❌ 请先使用 /检测灵根 开始修仙之旅")
@@ -125,7 +126,7 @@ async def shop_category_callback(update: Update, context: ContextTypes.DEFAULT_T
 
 async def show_category_items(query, user_id: int, category_name: str):
     """显示分类商品列表"""
-    async for db in get_db():
+    async with get_db() as db:
         player = await PlayerService.get_player_by_telegram_id(db, user_id)
         if not player:
             await query.edit_message_text("❌ 玩家不存在")
@@ -205,7 +206,7 @@ async def show_category_items(query, user_id: int, category_name: str):
 
 async def show_featured_items(query, user_id: int):
     """显示精选商品"""
-    async for db in get_db():
+    async with get_db() as db:
         player = await PlayerService.get_player_by_telegram_id(db, user_id)
         if not player:
             await query.edit_message_text("❌ 玩家不存在")
@@ -257,7 +258,7 @@ async def show_featured_items(query, user_id: int):
 
 async def show_item_detail(query, user_id: int, item_id: int):
     """显示商品详情"""
-    async for db in get_db():
+    async with get_db() as db:
         player = await PlayerService.get_player_by_telegram_id(db, user_id)
         if not player:
             await query.edit_message_text("❌ 玩家不存在")
@@ -339,7 +340,7 @@ async def show_item_detail(query, user_id: int, item_id: int):
 
 async def purchase_item(query, user_id: int, item_id: int):
     """购买商品"""
-    async for db in get_db():
+    async with get_db() as db:
         player = await PlayerService.get_player_by_telegram_id(db, user_id)
         if not player:
             await query.answer("❌ 玩家不存在", show_alert=True)
@@ -385,7 +386,7 @@ async def purchase_item(query, user_id: int, item_id: int):
             quantity=1,
             credit_cost=actual_price,
             original_price=item.credit_price,
-            player_realm=player.realm_type.value,
+            player_realm=player.realm.value,
             player_level=player.realm_level,
         )
         db.add(purchase)
@@ -417,8 +418,76 @@ async def purchase_item(query, user_id: int, item_id: int):
         await db.commit()
         await db.refresh(player)
 
-        # TODO: 发放物品到玩家背包（需要根据商品类型处理）
-        # 这里暂时只是记录购买，后续需要实现物品发放逻辑
+        # 发放物品到玩家背包
+        delivery_success = False
+        delivery_message = ""
+
+        if item.item_id:
+            # 商品关联了具体物品，添加到背包
+            result = await db.execute(
+                select(PlayerInventory).where(
+                    and_(
+                        PlayerInventory.player_id == player.id,
+                        PlayerInventory.item_id == item.item_id
+                    )
+                )
+            )
+            existing_inv = result.scalar_one_or_none()
+
+            if existing_inv:
+                existing_inv.quantity += 1
+            else:
+                new_inv = PlayerInventory(
+                    player_id=player.id,
+                    item_id=item.item_id,
+                    quantity=1
+                )
+                db.add(new_inv)
+
+            await db.commit()
+            delivery_success = True
+            delivery_message = "💼 物品已发放到背包"
+        elif item.special_effects:
+            # 特殊效果商品，解析并应用效果
+            try:
+                effects = json.loads(item.special_effects)
+                effect_messages = []
+
+                for effect in effects if isinstance(effects, list) else [effects]:
+                    effect_type = effect.get("type")
+                    value = effect.get("value", 0)
+
+                    if effect_type == "spirit_stones":
+                        player.spirit_stones += value
+                        effect_messages.append(f"💰 灵石 +{value:,}")
+                    elif effect_type == "exp":
+                        player.cultivation_exp += value
+                        effect_messages.append(f"⭐ 修为 +{value:,}")
+                    elif effect_type == "spiritual_power":
+                        player.spiritual_power = min(
+                            player.max_spiritual_power,
+                            player.spiritual_power + value
+                        )
+                        effect_messages.append(f"💧 灵力 +{value}")
+                    elif effect_type == "hp_recovery":
+                        player.hp = min(player.max_hp, player.hp + value)
+                        effect_messages.append(f"❤️ 生命恢复 +{value}")
+                    elif effect_type == "comprehension":
+                        player.comprehension += value
+                        effect_messages.append(f"🧠 悟性 +{value}")
+                    elif effect_type == "contribution":
+                        player.contribution += value
+                        effect_messages.append(f"🏛️ 门派贡献 +{value}")
+
+                await db.commit()
+                delivery_success = True
+                delivery_message = "✨ 效果已生效：\n" + "\n".join(effect_messages)
+            except (json.JSONDecodeError, TypeError):
+                delivery_message = "⚠️ 特殊效果应用失败，请联系管理员"
+        else:
+            # 无具体物品也无特殊效果，可能是虚拟商品
+            delivery_success = True
+            delivery_message = "📜 兑换凭证已记录"
 
         success_text = f"""
 ✅ 兑换成功！
@@ -432,7 +501,7 @@ async def purchase_item(query, user_id: int, item_id: int):
 
 {item.description}
 
-💡 提示：商品已发放到背包
+{delivery_message}
 """
 
         await query.answer("✅ 兑换成功！", show_alert=False)
@@ -466,7 +535,7 @@ async def exchange_credits_command(update: Update, context: ContextTypes.DEFAULT
         await update.message.reply_text("❌ 兑换数量必须大于0")
         return
 
-    async for db in get_db():
+    async with get_db() as db:
         player = await PlayerService.get_player_by_telegram_id(db, user_id)
         if not player:
             await update.message.reply_text("❌ 请先使用 /检测灵根 开始修仙之旅")
@@ -484,7 +553,7 @@ async def my_credits_command(update: Update, context: ContextTypes.DEFAULT_TYPE)
     """查看我的积分 - /我的积分"""
     user_id = update.effective_user.id
 
-    async for db in get_db():
+    async with get_db() as db:
         player = await PlayerService.get_player_by_telegram_id(db, user_id)
         if not player:
             await update.message.reply_text("❌ 请先使用 /检测灵根 开始修仙之旅")
@@ -539,7 +608,7 @@ async def my_credits_command(update: Update, context: ContextTypes.DEFAULT_TYPE)
 
 async def show_my_credits(query, user_id: int):
     """显示我的积分（回调版本）"""
-    async for db in get_db():
+    async with get_db() as db:
         player = await PlayerService.get_player_by_telegram_id(db, user_id)
         if not player:
             await query.edit_message_text("❌ 玩家不存在")
@@ -612,11 +681,18 @@ async def can_purchase_item(
     # 检查境界要求
     if item.required_realm:
         from bot.models import RealmType
-        required_realm = RealmType(item.required_realm)
-        if player.realm_type.value < required_realm.value:
-            return False, f"境界不足（需要 {item.required_realm}）"
-        if player.realm_type == required_realm and player.realm_level < item.required_level:
-            return False, f"境界等级不足（需要 {item.required_realm} {item.required_level}层）"
+        # 使用枚举的索引来比较境界高低
+        realm_order = list(RealmType)
+        try:
+            required_realm = RealmType(item.required_realm)
+            required_idx = realm_order.index(required_realm)
+            player_idx = realm_order.index(player.realm)
+            if player_idx < required_idx:
+                return False, f"境界不足（需要 {item.required_realm}）"
+            if player.realm == required_realm and player.realm_level < item.required_level:
+                return False, f"境界等级不足（需要 {item.required_realm} {item.required_level}层）"
+        except ValueError:
+            pass  # 如果境界字符串无效，跳过检查
 
     # 检查VIP等级
     if item.required_vip_level > 0:
@@ -645,7 +721,7 @@ async def can_purchase_item(
 
 async def show_exchange_spirit_stones(query, user_id: int):
     """显示兑换灵石界面"""
-    async for db in get_db():
+    async with get_db() as db:
         player = await PlayerService.get_player_by_telegram_id(db, user_id)
         if not player:
             await query.edit_message_text("❌ 玩家不存在")
@@ -701,7 +777,7 @@ async def show_exchange_spirit_stones(query, user_id: int):
 
 async def confirm_exchange_spirit_stones(query, user_id: int, credit_amount: int):
     """确认兑换灵石"""
-    async for db in get_db():
+    async with get_db() as db:
         player = await PlayerService.get_player_by_telegram_id(db, user_id)
         if not player:
             await query.answer("❌ 玩家不存在", show_alert=True)

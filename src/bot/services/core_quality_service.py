@@ -87,8 +87,9 @@ class CoreQualityService:
             return False, "您已经结丹成功", {}
 
         # 检查境界（必须是筑基期大圆满）
-        if player.realm != "筑基期" or player.level < 12:
-            return False, "需要达到筑基12层才能尝试结丹", {}
+        from bot.models import RealmType
+        if player.realm != RealmType.FOUNDATION or player.realm_level < 2:
+            return False, "需要达到筑基后期才能尝试结丹", {}
 
         # 基础成功率 50%
         base_success_rate = 0.5
@@ -123,7 +124,7 @@ class CoreQualityService:
         # 记录尝试
         attempt = CoreFormationAttempt(
             player_id=player.id,
-            cultivation_level=player.level,
+            cultivation_level=player.realm_level,
             pill_used_id=pill_item_id,
             pill_quality=pill_quality,
             is_success=is_success,
@@ -182,9 +183,10 @@ class CoreQualityService:
             player.spiritual_power = player.max_spiritual_power
 
             # 突破到结丹期
-            player.realm = "结丹期"
-            player.level = 1
-            player.cultivation = 0
+            from bot.models import RealmType
+            player.realm = RealmType.CORE_FORMATION
+            player.realm_level = 0
+            player.cultivation_exp = 0
 
             result_data.update({
                 "quality": quality,

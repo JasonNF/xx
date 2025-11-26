@@ -400,7 +400,7 @@ async def complete_quest_command(update: Update, context: ContextTypes.DEFAULT_T
         player.cultivation_exp += quest.exp_reward
         player.spirit_stones += quest.spirit_stones_reward
         if quest.contribution_reward > 0:
-            player.sect_contribution += quest.contribution_reward
+            player.contribution += quest.contribution_reward
 
         # TODO: 物品奖励 (需要背包系统)
 

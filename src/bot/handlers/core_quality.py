@@ -27,12 +27,13 @@ async def core_info_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
         if not player_core:
             msg = "💫 【金丹信息】\n\n"
             msg += "⚠️ 您还未结丹\n\n"
-            if player.realm == "筑基期" and player.level >= 12:
-                msg += "✅ 您已达到筑基12层，可以尝试结丹\n"
+            from bot.models import RealmType
+            if player.realm == RealmType.FOUNDATION and player.realm_level >= 2:
+                msg += "✅ 您已达到筑基后期，可以尝试结丹\n"
                 msg += "💡 使用 /结丹 尝试结丹"
             else:
-                msg += f"📊 当前境界：{player.realm} {player.level}层\n"
-                msg += "💡 需要达到筑基12层才能尝试结丹"
+                msg += f"📊 当前境界：{player.full_realm_name}\n"
+                msg += "💡 需要达到筑基后期才能尝试结丹"
         else:
             msg = "💫 【金丹信息】\n\n"
             msg += f"✨ 品质：{player_core.quality}/100\n"

@@ -140,7 +140,11 @@ async def capture_beast_command(update: Update, context: ContextTypes.DEFAULT_TY
             return
 
         # 检查境界
-        if player.realm in ["凡人", "炼气期"] and player.level < 7:
+        from bot.models import RealmType
+        if player.realm == RealmType.QI_REFINING and player.realm_level < 7:
+            await update.message.reply_text("❌ 需要达到炼气7层才能捕捉灵兽")
+            return
+        elif player.realm == RealmType.MORTAL:
             await update.message.reply_text("❌ 需要达到炼气7层才能捕捉灵兽")
             return
 
@@ -151,9 +155,9 @@ async def capture_beast_command(update: Update, context: ContextTypes.DEFAULT_TY
         beast_count = len(result.scalars().all())
 
         max_beasts = 3
-        if player.realm == "结丹期":
+        if player.realm == RealmType.CORE_FORMATION:
             max_beasts = 5
-        elif player.realm in ["元婴期", "化神期"]:
+        elif player.realm in [RealmType.NASCENT_SOUL, RealmType.DEITY_TRANSFORMATION]:
             max_beasts = 7
 
         if beast_count >= max_beasts:
@@ -184,7 +188,10 @@ async def capture_beast_command(update: Update, context: ContextTypes.DEFAULT_TY
 
         # 捕捉成功率
         base_rate = 0.6
-        level_bonus = (player.level if player.realm == "炼气期" else player.level + 13) * 0.02
+        # 根据总层数计算加成
+        from bot.services.player_service import PlayerService
+        total_level = PlayerService._calculate_total_realm_level(player.realm, player.realm_level)
+        level_bonus = total_level * 0.02
         comprehension_bonus = player.comprehension * 0.01
         rarity_penalty = template.rarity * 0.05
 

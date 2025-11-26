@@ -73,6 +73,19 @@ class PlayerService:
         return result.scalar_one_or_none()
 
     @staticmethod
+    async def get_player_by_telegram_id(db: AsyncSession, telegram_id: int) -> Optional[Player]:
+        """通过Telegram ID获取玩家（别名方法，兼容旧调用）
+
+        Args:
+            db: 数据库会话
+            telegram_id: Telegram用户ID
+
+        Returns:
+            玩家对象或None
+        """
+        return await PlayerService.get_player(db, telegram_id)
+
+    @staticmethod
     async def update_player_attributes(db: AsyncSession, player: Player) -> None:
         """根据境界更新玩家属性"""
         # 使用累计总层数计算，确保突破后属性递增

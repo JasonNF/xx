@@ -180,9 +180,12 @@ async def finish_exploration_command(update: Update, context: ContextTypes.DEFAU
 
         if found_adventure:
             # 触发奇遇！随机选择一个适合的奇遇
+            # 根据总层数计算适合的奇遇等级
+            from bot.services.player_service import PlayerService
+            total_level = PlayerService._calculate_total_realm_level(player.realm, player.realm_level)
             result = await db.execute(
                 select(AdventureTemplate).where(
-                    AdventureTemplate.required_level <= player.level
+                    AdventureTemplate.required_level <= total_level
                 )
             )
             templates = result.scalars().all()
@@ -316,7 +319,10 @@ async def complete_adventure_command(update: Update, context: ContextTypes.DEFAU
 
         # 计算成功率
         base_success_rate = 0.7
-        level_bonus = player.level * 0.02
+        # 使用总层数计算加成
+        from bot.services.player_service import PlayerService
+        total_level = PlayerService._calculate_total_realm_level(player.realm, player.realm_level)
+        level_bonus = total_level * 0.02
         comprehension_bonus = player.comprehension * 0.01
         danger_penalty = template.danger_level * 0.05
 
