@@ -40,6 +40,7 @@ async def cultivate_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
             reply_markup = InlineKeyboardMarkup(keyboard)
 
             status = await CultivationService.get_cultivation_status(player)
+            speed_preview = await CultivationService.calculate_cultivation_exp(db, player, 1)
             text = f"""
 🧘 **修炼系统**
 
@@ -47,10 +48,10 @@ async def cultivate_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 💡 选择修炼时长：
 • 修炼时间越长，获得修为越多
-• 悟性和根骨影响修炼效率
+• 悟性和灵根影响修炼效率
 • 修炼中可能遇到随机事件
 
-**当前修炼速度**: ~{CultivationService.calculate_cultivation_exp(player, 1)} 修为/小时
+**当前修炼速度**: ~{speed_preview} 修为/小时
 """
             await update.message.reply_text(
                 text,

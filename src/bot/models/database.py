@@ -19,6 +19,15 @@ if not settings.DATABASE_URL.startswith("sqlite"):
         "max_overflow": 40,
     })
 
+# Postgres 在受限环境下默认会尝试访问 ~/.postgresql 读取证书
+# 服务启用了 ProtectHome，因此强制禁用 SSL 以避免权限错误
+connect_args = {}
+if settings.DATABASE_URL.startswith("postgresql+asyncpg"):
+    connect_args["ssl"] = False
+
+if connect_args:
+    engine_args["connect_args"] = connect_args
+
 engine = create_async_engine(settings.DATABASE_URL, **engine_args)
 
 # 创建异步会话工厂
