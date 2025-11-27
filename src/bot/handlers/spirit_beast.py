@@ -1,7 +1,7 @@
 """灵兽系统handlers"""
 import json
 from telegram import Update
-from telegram.ext import ContextTypes, CommandHandler
+from telegram.ext import MessageHandler, filters, ContextTypes, CommandHandler
 
 from bot.models.database import AsyncSessionLocal
 from bot.models import Player
@@ -684,11 +684,11 @@ async def fuse_beasts_command(update: Update, context: ContextTypes.DEFAULT_TYPE
 
 def register_handlers(application):
     """注册灵兽相关处理器"""
-    application.add_handler(CommandHandler("灵兽", beast_list_command))
-    application.add_handler(CommandHandler("灵兽图鉴", beast_codex_command))
-    application.add_handler(CommandHandler("捕捉灵兽", capture_beast_command))
-    application.add_handler(CommandHandler("出战灵兽", deploy_beast_command))
-    application.add_handler(CommandHandler("训练灵兽", train_beast_command))
-    application.add_handler(CommandHandler("训练结算", finish_training_command))
-    application.add_handler(CommandHandler("灵兽进化", evolve_beast_command))
-    application.add_handler(CommandHandler("灵兽融合", fuse_beasts_command))
+    application.add_handler(MessageHandler(filters.Regex(r"^\.灵兽"), beast_list_command))
+    application.add_handler(MessageHandler(filters.Regex(r"^\.灵兽图鉴"), beast_codex_command))
+    application.add_handler(MessageHandler(filters.Regex(r"^\.捕捉灵兽"), capture_beast_command))
+    application.add_handler(MessageHandler(filters.Regex(r"^\.出战灵兽"), deploy_beast_command))
+    application.add_handler(MessageHandler(filters.Regex(r"^\.训练灵兽"), train_beast_command))
+    application.add_handler(MessageHandler(filters.Regex(r"^\.训练结算"), finish_training_command))
+    application.add_handler(MessageHandler(filters.Regex(r"^\.灵兽进化"), evolve_beast_command))
+    application.add_handler(MessageHandler(filters.Regex(r"^\.灵兽融合"), fuse_beasts_command))

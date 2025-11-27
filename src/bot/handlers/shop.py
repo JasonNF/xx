@@ -1,6 +1,6 @@
 """商店系统handlers - 凡人修仙传版本"""
 from telegram import Update
-from telegram.ext import ContextTypes, CommandHandler
+from telegram.ext import MessageHandler, filters, ContextTypes, CommandHandler
 
 from bot.models.database import AsyncSessionLocal
 from bot.models import Player, Item, PlayerInventory, ItemType
@@ -323,6 +323,6 @@ async def sell_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 def register_handlers(application):
     """注册商店相关处理器"""
-    application.add_handler(CommandHandler("商店", shop_command))
-    application.add_handler(CommandHandler("购买", buy_command))
-    application.add_handler(CommandHandler("出售", sell_command))
+    application.add_handler(MessageHandler(filters.Regex(r"^\.商店"), shop_command))
+    application.add_handler(MessageHandler(filters.Regex(r"^\.购买"), buy_command))
+    application.add_handler(MessageHandler(filters.Regex(r"^\.出售"), sell_command))

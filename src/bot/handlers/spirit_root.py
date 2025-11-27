@@ -1,6 +1,6 @@
 """灵根检测 - 凡人修仙传核心机制"""
 from telegram import Update
-from telegram.ext import ContextTypes, CommandHandler
+from telegram.ext import MessageHandler, filters, ContextTypes, CommandHandler
 
 from bot.models.database import AsyncSessionLocal
 from bot.models.player import Player
@@ -57,4 +57,4 @@ async def test_root_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 def register_handlers(application):
     """注册灵根相关处理器"""
-    application.add_handler(CommandHandler("灵根", test_root_command))
+    application.add_handler(MessageHandler(filters.Regex(r"^\.灵根"), test_root_command))

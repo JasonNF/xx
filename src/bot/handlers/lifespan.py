@@ -1,6 +1,6 @@
 """寿元系统handlers - 凡人修仙传版本"""
 from telegram import Update
-from telegram.ext import ContextTypes, CommandHandler
+from telegram.ext import MessageHandler, filters, ContextTypes, CommandHandler
 
 from bot.models.database import AsyncSessionLocal
 from bot.models import Player
@@ -82,4 +82,4 @@ async def lifespan_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 def register_handlers(application):
     """注册寿元相关处理器"""
-    application.add_handler(CommandHandler("寿元", lifespan_command))
+    application.add_handler(MessageHandler(filters.Regex(r"^\.寿元"), lifespan_command))

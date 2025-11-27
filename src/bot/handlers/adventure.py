@@ -5,7 +5,7 @@ import json
 from datetime import datetime, timedelta
 
 from telegram import Update
-from telegram.ext import ContextTypes, CommandHandler, Application
+from telegram.ext import MessageHandler, filters, ContextTypes, CommandHandler, Application
 from sqlalchemy import select, and_
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -484,12 +484,12 @@ async def luck_status_command(update: Update, context: ContextTypes.DEFAULT_TYPE
 
 def register_handlers(application: Application):
     """注册处理器"""
-    application.add_handler(CommandHandler("奇遇", adventure_info_command))
-    application.add_handler(CommandHandler("探索奇遇", explore_adventure_command))
-    application.add_handler(CommandHandler("探索结算", finish_exploration_command))
-    application.add_handler(CommandHandler("奇遇列表", list_adventures_command))
-    application.add_handler(CommandHandler("完成奇遇", complete_adventure_command))
-    application.add_handler(CommandHandler("祈福", pray_command))
-    application.add_handler(CommandHandler("运气", luck_status_command))
+    application.add_handler(MessageHandler(filters.Regex(r"^\.奇遇"), adventure_info_command))
+    application.add_handler(MessageHandler(filters.Regex(r"^\.探索奇遇"), explore_adventure_command))
+    application.add_handler(MessageHandler(filters.Regex(r"^\.探索结算"), finish_exploration_command))
+    application.add_handler(MessageHandler(filters.Regex(r"^\.奇遇列表"), list_adventures_command))
+    application.add_handler(MessageHandler(filters.Regex(r"^\.完成奇遇"), complete_adventure_command))
+    application.add_handler(MessageHandler(filters.Regex(r"^\.祈福"), pray_command))
+    application.add_handler(MessageHandler(filters.Regex(r"^\.运气"), luck_status_command))
 
     logger.info("奇遇系统命令处理器注册完成")

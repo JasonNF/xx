@@ -1,7 +1,7 @@
 """世界BOSS handler"""
 import logging
 from telegram import Update
-from telegram.ext import ContextTypes, CommandHandler, Application
+from telegram.ext import MessageHandler, filters, ContextTypes, CommandHandler, Application
 from sqlalchemy import select
 
 from bot.models import get_db, Player
@@ -205,9 +205,9 @@ async def my_boss_stats_command(update: Update, context: ContextTypes.DEFAULT_TY
 
 def register_handlers(application: Application):
     """注册所有handler"""
-    application.add_handler(CommandHandler("世界BOSS", world_boss_status_command))
-    application.add_handler(CommandHandler("攻击BOSS", attack_boss_command))
-    application.add_handler(CommandHandler("BOSS排行", boss_rankings_command))
-    application.add_handler(CommandHandler("我的BOSS战绩", my_boss_stats_command))
+    application.add_handler(MessageHandler(filters.Regex(r"^\.世界BOSS"), world_boss_status_command))
+    application.add_handler(MessageHandler(filters.Regex(r"^\.攻击BOSS"), attack_boss_command))
+    application.add_handler(MessageHandler(filters.Regex(r"^\.BOSS排行"), boss_rankings_command))
+    application.add_handler(MessageHandler(filters.Regex(r"^\.我的BOSS战绩"), my_boss_stats_command))
 
     logger.info("世界BOSS handlers已注册")

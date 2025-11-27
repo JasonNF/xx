@@ -1,7 +1,7 @@
 """符箓系统handlers"""
 import json
 from telegram import Update
-from telegram.ext import ContextTypes, CommandHandler
+from telegram.ext import MessageHandler, filters, ContextTypes, CommandHandler
 from datetime import datetime, timedelta
 import random
 
@@ -585,10 +585,10 @@ async def use_talisman_command(update: Update, context: ContextTypes.DEFAULT_TYP
 
 def register_handlers(application):
     """注册符箓相关处理器"""
-    application.add_handler(CommandHandler("制符", talisman_skill_command))
-    application.add_handler(CommandHandler("符箓图鉴", talisman_recipes_command))
-    application.add_handler(CommandHandler("制作符箓", craft_talisman_command))
-    application.add_handler(CommandHandler("制符结算", finish_craft_command))
-    application.add_handler(CommandHandler("制符取消", cancel_craft_command))
-    application.add_handler(CommandHandler("我的符箓", my_talismans_command))
-    application.add_handler(CommandHandler("使用符箓", use_talisman_command))
+    application.add_handler(MessageHandler(filters.Regex(r"^\.制符"), talisman_skill_command))
+    application.add_handler(MessageHandler(filters.Regex(r"^\.符箓图鉴"), talisman_recipes_command))
+    application.add_handler(MessageHandler(filters.Regex(r"^\.制作符箓"), craft_talisman_command))
+    application.add_handler(MessageHandler(filters.Regex(r"^\.制符结算"), finish_craft_command))
+    application.add_handler(MessageHandler(filters.Regex(r"^\.制符取消"), cancel_craft_command))
+    application.add_handler(MessageHandler(filters.Regex(r"^\.我的符箓"), my_talismans_command))
+    application.add_handler(MessageHandler(filters.Regex(r"^\.使用符箓"), use_talisman_command))

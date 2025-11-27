@@ -1,6 +1,6 @@
 """神识系统handlers - 凡人修仙传版本"""
 from telegram import Update
-from telegram.ext import ContextTypes, CommandHandler
+from telegram.ext import MessageHandler, filters, ContextTypes, CommandHandler
 
 from bot.models.database import AsyncSessionLocal
 from bot.models import Player
@@ -284,7 +284,7 @@ async def divine_sense_scan_command(update: Update, context: ContextTypes.DEFAUL
 
 def register_handlers(application):
     """注册神识相关处理器"""
-    application.add_handler(CommandHandler("神识", divine_sense_info_command))
-    application.add_handler(CommandHandler("修炼神识", train_divine_sense_command))
-    application.add_handler(CommandHandler("探查", probe_command))
-    application.add_handler(CommandHandler("神识扫描", divine_sense_scan_command))
+    application.add_handler(MessageHandler(filters.Regex(r"^\.神识"), divine_sense_info_command))
+    application.add_handler(MessageHandler(filters.Regex(r"^\.修炼神识"), train_divine_sense_command))
+    application.add_handler(MessageHandler(filters.Regex(r"^\.探查"), probe_command))
+    application.add_handler(MessageHandler(filters.Regex(r"^\.神识扫描"), divine_sense_scan_command))

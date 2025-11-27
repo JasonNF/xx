@@ -3,7 +3,7 @@ import logging
 from datetime import datetime, timedelta
 
 from telegram import Update
-from telegram.ext import ContextTypes, CommandHandler, Application
+from telegram.ext import MessageHandler, filters, ContextTypes, CommandHandler, Application
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -559,15 +559,15 @@ async def harvest_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 def register_handlers(application: Application):
     """注册处理器"""
-    application.add_handler(CommandHandler("洞府", cave_info_command))
-    application.add_handler(CommandHandler("购买洞府", buy_cave_command))
-    application.add_handler(CommandHandler("房间列表", list_room_types_command))
-    application.add_handler(CommandHandler("建造房间", build_room_command))
-    application.add_handler(CommandHandler("升级洞府", upgrade_cave_command))
-    application.add_handler(CommandHandler("维护洞府", maintain_cave_command))
-    application.add_handler(CommandHandler("改名洞府", rename_cave_command))
-    application.add_handler(CommandHandler("灵田", spirit_field_command))
-    application.add_handler(CommandHandler("种植", plant_command))
-    application.add_handler(CommandHandler("收获", harvest_command))
+    application.add_handler(MessageHandler(filters.Regex(r"^\.洞府"), cave_info_command))
+    application.add_handler(MessageHandler(filters.Regex(r"^\.购买洞府"), buy_cave_command))
+    application.add_handler(MessageHandler(filters.Regex(r"^\.房间列表"), list_room_types_command))
+    application.add_handler(MessageHandler(filters.Regex(r"^\.建造房间"), build_room_command))
+    application.add_handler(MessageHandler(filters.Regex(r"^\.升级洞府"), upgrade_cave_command))
+    application.add_handler(MessageHandler(filters.Regex(r"^\.维护洞府"), maintain_cave_command))
+    application.add_handler(MessageHandler(filters.Regex(r"^\.改名洞府"), rename_cave_command))
+    application.add_handler(MessageHandler(filters.Regex(r"^\.灵田"), spirit_field_command))
+    application.add_handler(MessageHandler(filters.Regex(r"^\.种植"), plant_command))
+    application.add_handler(MessageHandler(filters.Regex(r"^\.收获"), harvest_command))
 
     logger.info("洞府系统命令处理器注册完成")

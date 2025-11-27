@@ -1,6 +1,6 @@
 """市场交易和拍卖系统handlers"""
 from telegram import Update
-from telegram.ext import ContextTypes, CommandHandler
+from telegram.ext import MessageHandler, filters, ContextTypes, CommandHandler
 
 from bot.models.database import AsyncSessionLocal
 from bot.models import Player, Item, PlayerInventory
@@ -553,16 +553,16 @@ async def cancel_auction_command(update: Update, context: ContextTypes.DEFAULT_T
 def register_handlers(application):
     """注册市场交易相关处理器"""
     # 市场交易
-    application.add_handler(CommandHandler("市场", market_list_command))
-    application.add_handler(CommandHandler("上架", list_item_command))
-    application.add_handler(CommandHandler("购买", buy_from_market_command))
-    application.add_handler(CommandHandler("我的上架", my_listings_command))
-    application.add_handler(CommandHandler("取消上架", cancel_listing_command))
+    application.add_handler(MessageHandler(filters.Regex(r"^\.市场"), market_list_command))
+    application.add_handler(MessageHandler(filters.Regex(r"^\.上架"), list_item_command))
+    application.add_handler(MessageHandler(filters.Regex(r"^\.购买"), buy_from_market_command))
+    application.add_handler(MessageHandler(filters.Regex(r"^\.我的上架"), my_listings_command))
+    application.add_handler(MessageHandler(filters.Regex(r"^\.取消上架"), cancel_listing_command))
 
     # 拍卖行
-    application.add_handler(CommandHandler("拍卖", auction_list_command))
-    application.add_handler(CommandHandler("创建拍卖", create_auction_command))
-    application.add_handler(CommandHandler("出价", place_bid_command))
-    application.add_handler(CommandHandler("一口价", buyout_auction_command))
-    application.add_handler(CommandHandler("我的拍卖", my_auctions_command))
-    application.add_handler(CommandHandler("取消拍卖", cancel_auction_command))
+    application.add_handler(MessageHandler(filters.Regex(r"^\.拍卖"), auction_list_command))
+    application.add_handler(MessageHandler(filters.Regex(r"^\.创建拍卖"), create_auction_command))
+    application.add_handler(MessageHandler(filters.Regex(r"^\.出价"), place_bid_command))
+    application.add_handler(MessageHandler(filters.Regex(r"^\.一口价"), buyout_auction_command))
+    application.add_handler(MessageHandler(filters.Regex(r"^\.我的拍卖"), my_auctions_command))
+    application.add_handler(MessageHandler(filters.Regex(r"^\.取消拍卖"), cancel_auction_command))

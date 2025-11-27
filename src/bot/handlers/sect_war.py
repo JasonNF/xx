@@ -1,7 +1,7 @@
 """宗门战争handler"""
 import logging
 from telegram import Update
-from telegram.ext import ContextTypes, CommandHandler, Application
+from telegram.ext import MessageHandler, filters, ContextTypes, CommandHandler, Application
 from sqlalchemy import select
 
 from bot.models import get_db, Player, Sect, SectWar, SectWarStatus
@@ -205,9 +205,9 @@ async def ongoing_wars_command(update: Update, context: ContextTypes.DEFAULT_TYP
 
 def register_handlers(application: Application):
     """注册所有handler"""
-    application.add_handler(CommandHandler("宣战", declare_war_command))
-    application.add_handler(CommandHandler("参战", join_war_command))
-    application.add_handler(CommandHandler("宗门战状态", war_status_command))
-    application.add_handler(CommandHandler("进行中的宗门战", ongoing_wars_command))
+    application.add_handler(MessageHandler(filters.Regex(r"^\.宣战"), declare_war_command))
+    application.add_handler(MessageHandler(filters.Regex(r"^\.参战"), join_war_command))
+    application.add_handler(MessageHandler(filters.Regex(r"^\.宗门战状态"), war_status_command))
+    application.add_handler(MessageHandler(filters.Regex(r"^\.进行中的宗门战"), ongoing_wars_command))
 
     logger.info("宗门战争handlers已注册")

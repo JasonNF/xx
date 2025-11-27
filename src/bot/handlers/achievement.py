@@ -1,7 +1,7 @@
 """成就系统handler"""
 import logging
 from telegram import Update
-from telegram.ext import ContextTypes, CommandHandler, Application
+from telegram.ext import MessageHandler, filters, ContextTypes, CommandHandler, Application
 
 from bot.models import get_db, Player, AchievementCategory
 from bot.services.achievement_service import AchievementService
@@ -306,11 +306,11 @@ async def unequip_title_command(update: Update, context: ContextTypes.DEFAULT_TY
 
 def register_handlers(application: Application):
     """注册所有handler"""
-    application.add_handler(CommandHandler("成就", achievement_command))
-    application.add_handler(CommandHandler("领取成就", claim_achievement_command))
-    application.add_handler(CommandHandler("成就统计", achievement_stats_command))
-    application.add_handler(CommandHandler("称号", titles_command))
-    application.add_handler(CommandHandler("装备称号", equip_title_command))
-    application.add_handler(CommandHandler("卸下称号", unequip_title_command))
+    application.add_handler(MessageHandler(filters.Regex(r"^\.成就"), achievement_command))
+    application.add_handler(MessageHandler(filters.Regex(r"^\.领取成就"), claim_achievement_command))
+    application.add_handler(MessageHandler(filters.Regex(r"^\.成就统计"), achievement_stats_command))
+    application.add_handler(MessageHandler(filters.Regex(r"^\.称号"), titles_command))
+    application.add_handler(MessageHandler(filters.Regex(r"^\.装备称号"), equip_title_command))
+    application.add_handler(MessageHandler(filters.Regex(r"^\.卸下称号"), unequip_title_command))
 
     logger.info("成就系统handlers已注册")

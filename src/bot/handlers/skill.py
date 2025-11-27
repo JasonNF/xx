@@ -1,6 +1,6 @@
 """技能系统handlers - 凡人修仙传版本"""
 from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup
-from telegram.ext import ContextTypes, CommandHandler, CallbackQueryHandler
+from telegram.ext import MessageHandler, filters, ContextTypes, CommandHandler, CallbackQueryHandler
 
 from bot.models.database import AsyncSessionLocal
 from bot.models import Player, Skill, PlayerSkill
@@ -351,6 +351,6 @@ async def upgrade_skill_command(update: Update, context: ContextTypes.DEFAULT_TY
 
 def register_handlers(application):
     """注册技能相关处理器"""
-    application.add_handler(CommandHandler("技能", skills_command))
-    application.add_handler(CommandHandler("学习", learn_skill_command))
-    application.add_handler(CommandHandler("升级", upgrade_skill_command))
+    application.add_handler(MessageHandler(filters.Regex(r"^\.技能"), skills_command))
+    application.add_handler(MessageHandler(filters.Regex(r"^\.学习"), learn_skill_command))
+    application.add_handler(MessageHandler(filters.Regex(r"^\.升级"), upgrade_skill_command))

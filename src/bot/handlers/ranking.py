@@ -1,6 +1,6 @@
 """排行榜系统handlers - 凡人修仙传版本"""
 from telegram import Update
-from telegram.ext import ContextTypes, CommandHandler
+from telegram.ext import MessageHandler, filters, ContextTypes, CommandHandler
 
 from bot.models.database import AsyncSessionLocal
 from bot.models import Player, RealmType
@@ -171,4 +171,4 @@ async def ranking_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 def register_handlers(application):
     """注册排行榜相关处理器"""
-    application.add_handler(CommandHandler("排行", ranking_command))
+    application.add_handler(MessageHandler(filters.Regex(r"^\.排行"), ranking_command))

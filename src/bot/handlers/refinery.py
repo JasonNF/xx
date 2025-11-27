@@ -1,7 +1,7 @@
 """炼器系统handlers - 凡人修仙传版本"""
 import json
 from telegram import Update
-from telegram.ext import ContextTypes, CommandHandler
+from telegram.ext import MessageHandler, filters, ContextTypes, CommandHandler
 
 from bot.models.database import AsyncSessionLocal
 from bot.models import Player, Item
@@ -255,8 +255,8 @@ async def cancel_refinery_command(update: Update, context: ContextTypes.DEFAULT_
 
 def register_handlers(application):
     """注册炼器相关处理器"""
-    application.add_handler(CommandHandler("炼器", refinery_info_command))
-    application.add_handler(CommandHandler("器方", recipes_refinery_command))
-    application.add_handler(CommandHandler("炼制法宝", refine_item_command))
-    application.add_handler(CommandHandler("炼器结算", finish_refinery_command))
-    application.add_handler(CommandHandler("炼器取消", cancel_refinery_command))
+    application.add_handler(MessageHandler(filters.Regex(r"^\.炼器"), refinery_info_command))
+    application.add_handler(MessageHandler(filters.Regex(r"^\.器方"), recipes_refinery_command))
+    application.add_handler(MessageHandler(filters.Regex(r"^\.炼制法宝"), refine_item_command))
+    application.add_handler(MessageHandler(filters.Regex(r"^\.炼器结算"), finish_refinery_command))
+    application.add_handler(MessageHandler(filters.Regex(r"^\.炼器取消"), cancel_refinery_command))

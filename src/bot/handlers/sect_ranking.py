@@ -1,6 +1,6 @@
 """宗门排行榜系统"""
 from telegram import Update
-from telegram.ext import ContextTypes, CommandHandler
+from telegram.ext import MessageHandler, filters, ContextTypes, CommandHandler
 
 from bot.models.database import AsyncSessionLocal
 from bot.models import Player, Sect
@@ -346,5 +346,5 @@ async def player_reputation_ranking_command(update: Update, context: ContextType
 
 def register_handlers(application):
     """注册排行榜相关处理器"""
-    application.add_handler(CommandHandler("宗门排行", sect_ranking_command))
-    application.add_handler(CommandHandler("声望排行", player_reputation_ranking_command))
+    application.add_handler(MessageHandler(filters.Regex(r"^\.宗门排行"), sect_ranking_command))
+    application.add_handler(MessageHandler(filters.Regex(r"^\.声望排行"), player_reputation_ranking_command))

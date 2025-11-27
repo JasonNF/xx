@@ -1,7 +1,7 @@
 """竞技场handler"""
 import logging
 from telegram import Update
-from telegram.ext import ContextTypes, CommandHandler, Application
+from telegram.ext import MessageHandler, filters, ContextTypes, CommandHandler, Application
 from sqlalchemy import select
 
 from bot.models import get_db, Player
@@ -173,9 +173,9 @@ async def arena_rankings_command(update: Update, context: ContextTypes.DEFAULT_T
 
 def register_handlers(application: Application):
     """注册所有handler"""
-    application.add_handler(CommandHandler("竞技场", arena_info_command))
-    application.add_handler(CommandHandler("挑战目标", challenge_targets_command))
-    application.add_handler(CommandHandler("挑战", challenge_command))
-    application.add_handler(CommandHandler("竞技场排行", arena_rankings_command))
+    application.add_handler(MessageHandler(filters.Regex(r"^\.竞技场"), arena_info_command))
+    application.add_handler(MessageHandler(filters.Regex(r"^\.挑战目标"), challenge_targets_command))
+    application.add_handler(MessageHandler(filters.Regex(r"^\.挑战"), challenge_command))
+    application.add_handler(MessageHandler(filters.Regex(r"^\.竞技场排行"), arena_rankings_command))
 
     logger.info("竞技场handlers已注册")

@@ -1,6 +1,6 @@
 """修炼相关命令处理器"""
 from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup
-from telegram.ext import ContextTypes, CommandHandler, CallbackQueryHandler
+from telegram.ext import MessageHandler, filters, ContextTypes, CommandHandler, CallbackQueryHandler
 
 from bot.models import get_db
 from bot.services.player_service import PlayerService
@@ -40,7 +40,6 @@ async def cultivate_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
             reply_markup = InlineKeyboardMarkup(keyboard)
 
             status = await CultivationService.get_cultivation_status(player)
-            speed_preview = await CultivationService.calculate_cultivation_exp(db, player, 1)
             text = f"""
 🧘 **修炼系统**
 
@@ -48,10 +47,10 @@ async def cultivate_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 💡 选择修炼时长：
 • 修炼时间越长，获得修为越多
-• 悟性和灵根影响修炼效率
+• 悟性和根骨影响修炼效率
 • 修炼中可能遇到随机事件
 
-**当前修炼速度**: ~{speed_preview} 修为/小时
+**当前修炼速度**: ~{CultivationService.calculate_cultivation_exp(player, 1)} 修为/小时
 """
             await update.message.reply_text(
                 text,
@@ -190,10 +189,10 @@ async def cultivation_callback(update: Update, context: ContextTypes.DEFAULT_TYP
 # 注册处理器
 def register_handlers(application):
     """注册修炼相关处理器"""
-    application.add_handler(CommandHandler("修炼", cultivate_command))
-    application.add_handler(CommandHandler("结算", finish_cultivation_command))
-    application.add_handler(CommandHandler("取消", cancel_cultivation_command))
-    application.add_handler(CommandHandler("突破", breakthrough_command))
+    application.add_handler(MessageHandler(filters.Regex(r"^\.修炼"), cultivate_command))
+    application.add_handler(MessageHandler(filters.Regex(r"^\.结算"), finish_cultivation_command))
+    application.add_handler(MessageHandler(filters.Regex(r"^\.取消"), cancel_cultivation_command))
+    application.add_handler(MessageHandler(filters.Regex(r"^\.突破"), breakthrough_command))
 
     # 回调查询
     application.add_handler(CallbackQueryHandler(

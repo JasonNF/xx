@@ -1,6 +1,6 @@
 """传功长老系统 - 宗门功法学习"""
 from telegram import Update
-from telegram.ext import ContextTypes, CommandHandler
+from telegram.ext import MessageHandler, filters, ContextTypes, CommandHandler
 
 from bot.models.database import AsyncSessionLocal
 from bot.models import Player, Sect, RealmType
@@ -348,5 +348,5 @@ async def learn_sect_method_command(update: Update, context: ContextTypes.DEFAUL
 
 def register_handlers(application):
     """注册传功长老相关处理器"""
-    application.add_handler(CommandHandler("宗门功法", sect_methods_command))
-    application.add_handler(CommandHandler("传功", learn_sect_method_command))
+    application.add_handler(MessageHandler(filters.Regex(r"^\.宗门功法"), sect_methods_command))
+    application.add_handler(MessageHandler(filters.Regex(r"^\.传功"), learn_sect_method_command))

@@ -4,7 +4,7 @@ from datetime import datetime, timedelta
 from typing import Optional
 
 from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup
-from telegram.ext import ContextTypes, CommandHandler, CallbackQueryHandler
+from telegram.ext import MessageHandler, filters, ContextTypes, CommandHandler, CallbackQueryHandler
 from sqlalchemy import select, and_
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -807,7 +807,7 @@ async def confirm_exchange_spirit_stones(query, user_id: int, credit_amount: int
 # 注册处理器
 def register_handlers(application):
     """注册积分商城处理器"""
-    application.add_handler(CommandHandler(["积分商城", "商城"], credit_shop_command))
-    application.add_handler(CommandHandler("我的积分", my_credits_command))
-    application.add_handler(CommandHandler("兑换灵石", exchange_credits_command))
+    application.add_handler(MessageHandler(filters.Regex(r"^\.积分商城"), credit_shop_command))
+    application.add_handler(MessageHandler(filters.Regex(r"^\.我的积分"), my_credits_command))
+    application.add_handler(MessageHandler(filters.Regex(r"^\.兑换灵石"), exchange_credits_command))
     application.add_handler(CallbackQueryHandler(shop_category_callback, pattern="^shop_"))

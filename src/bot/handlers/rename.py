@@ -2,7 +2,7 @@
 import re
 from datetime import datetime
 from telegram import Update
-from telegram.ext import ContextTypes, CommandHandler
+from telegram.ext import MessageHandler, filters, ContextTypes, CommandHandler
 
 from bot.models import get_db
 from bot.services.player_service import PlayerService
@@ -192,5 +192,5 @@ async def check_rename_status_command(update: Update, context: ContextTypes.DEFA
 
 def register_handlers(application):
     """注册改名相关处理器"""
-    application.add_handler(CommandHandler("改名", rename_command))
-    application.add_handler(CommandHandler("改名状态", check_rename_status_command))
+    application.add_handler(MessageHandler(filters.Regex(r"^\.改名"), rename_command))
+    application.add_handler(MessageHandler(filters.Regex(r"^\.改名状态"), check_rename_status_command))

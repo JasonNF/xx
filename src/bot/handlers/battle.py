@@ -1,6 +1,6 @@
 """战斗系统handlers - 整合技能系统"""
 from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup
-from telegram.ext import ContextTypes, CommandHandler, CallbackQueryHandler
+from telegram.ext import MessageHandler, filters, ContextTypes, CommandHandler, CallbackQueryHandler
 
 from bot.models.database import AsyncSessionLocal
 from bot.models import Player, Monster, PlayerSkill, Skill
@@ -411,7 +411,7 @@ async def battle_strategy_command(update: Update, context: ContextTypes.DEFAULT_
 
 def register_handlers(application):
     """注册战斗相关处理器"""
-    application.add_handler(CommandHandler("战斗", battle_command))
-    application.add_handler(CommandHandler("切磋", battle_pvp_command))
-    application.add_handler(CommandHandler("施法", use_skill_command))
-    application.add_handler(CommandHandler("战略", battle_strategy_command))
+    application.add_handler(MessageHandler(filters.Regex(r"^\.战斗"), battle_command))
+    application.add_handler(MessageHandler(filters.Regex(r"^\.切磋"), battle_pvp_command))
+    application.add_handler(MessageHandler(filters.Regex(r"^\.施法"), use_skill_command))
+    application.add_handler(MessageHandler(filters.Regex(r"^\.战略"), battle_strategy_command))

@@ -1,6 +1,6 @@
 """金丹品质系统handlers"""
 from telegram import Update
-from telegram.ext import ContextTypes, CommandHandler
+from telegram.ext import MessageHandler, filters, ContextTypes, CommandHandler
 
 from bot.models.database import AsyncSessionLocal
 from bot.models import Player
@@ -266,8 +266,8 @@ async def refine_history_command(update: Update, context: ContextTypes.DEFAULT_T
 
 def register_handlers(application):
     """注册金丹品质相关处理器"""
-    application.add_handler(CommandHandler("金丹", core_info_command))
-    application.add_handler(CommandHandler("结丹", core_formation_command))
-    application.add_handler(CommandHandler("祭炼金丹", refine_core_command))
-    application.add_handler(CommandHandler("结丹记录", core_history_command))
-    application.add_handler(CommandHandler("祭炼记录", refine_history_command))
+    application.add_handler(MessageHandler(filters.Regex(r"^\.金丹"), core_info_command))
+    application.add_handler(MessageHandler(filters.Regex(r"^\.结丹"), core_formation_command))
+    application.add_handler(MessageHandler(filters.Regex(r"^\.祭炼金丹"), refine_core_command))
+    application.add_handler(MessageHandler(filters.Regex(r"^\.结丹记录"), core_history_command))
+    application.add_handler(MessageHandler(filters.Regex(r"^\.祭炼记录"), refine_history_command))

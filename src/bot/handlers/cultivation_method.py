@@ -1,6 +1,6 @@
 """功法系统handlers - 凡人修仙传版本"""
 from telegram import Update
-from telegram.ext import ContextTypes, CommandHandler
+from telegram.ext import MessageHandler, filters, ContextTypes, CommandHandler
 
 from bot.models.database import AsyncSessionLocal
 from bot.models import Player, RealmType
@@ -255,5 +255,5 @@ async def learn_method_command(update: Update, context: ContextTypes.DEFAULT_TYP
 
 def register_handlers(application):
     """注册功法相关处理器"""
-    application.add_handler(CommandHandler("功法", methods_command))
-    application.add_handler(CommandHandler("修炼功法", learn_method_command))
+    application.add_handler(MessageHandler(filters.Regex(r"^\.功法"), methods_command))
+    application.add_handler(MessageHandler(filters.Regex(r"^\.修炼功法"), learn_method_command))

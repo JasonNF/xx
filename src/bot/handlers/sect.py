@@ -1,6 +1,6 @@
 """宗门系统handlers - 凡人修仙传版本"""
 from telegram import Update
-from telegram.ext import ContextTypes, CommandHandler
+from telegram.ext import MessageHandler, filters, ContextTypes, CommandHandler
 
 from bot.models.database import AsyncSessionLocal
 from bot.models import Player, RealmType
@@ -471,10 +471,10 @@ async def challenge_master_command(update: Update, context: ContextTypes.DEFAULT
 
 def register_handlers(application):
     """注册宗门相关处理器"""
-    application.add_handler(CommandHandler("宗门", sect_command))
-    application.add_handler(CommandHandler("入门", join_sect_command))
-    application.add_handler(CommandHandler("退出", leave_sect_command))
-    application.add_handler(CommandHandler("贡献", donate_command))
-    application.add_handler(CommandHandler("兑换", sect_shop_command))
-    application.add_handler(CommandHandler("宗门成员", sect_members_command))
-    application.add_handler(CommandHandler("挑战掌门", challenge_master_command))
+    application.add_handler(MessageHandler(filters.Regex(r"^\.宗门"), sect_command))
+    application.add_handler(MessageHandler(filters.Regex(r"^\.入门"), join_sect_command))
+    application.add_handler(MessageHandler(filters.Regex(r"^\.退出"), leave_sect_command))
+    application.add_handler(MessageHandler(filters.Regex(r"^\.贡献"), donate_command))
+    application.add_handler(MessageHandler(filters.Regex(r"^\.兑换"), sect_shop_command))
+    application.add_handler(MessageHandler(filters.Regex(r"^\.宗门成员"), sect_members_command))
+    application.add_handler(MessageHandler(filters.Regex(r"^\.挑战掌门"), challenge_master_command))

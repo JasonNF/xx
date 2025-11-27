@@ -1,6 +1,6 @@
 """背包系统handlers - 凡人修仙传版本"""
 from telegram import Update
-from telegram.ext import ContextTypes, CommandHandler
+from telegram.ext import MessageHandler, filters, ContextTypes, CommandHandler
 
 from bot.models.database import AsyncSessionLocal
 from bot.models import Player, Item, PlayerInventory, ItemType
@@ -689,11 +689,11 @@ async def set_bonus_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 def register_handlers(application):
     """注册背包相关处理器"""
-    application.add_handler(CommandHandler("背包", inventory_command))
-    application.add_handler(CommandHandler("使用", use_item_command))
-    application.add_handler(CommandHandler("装备", equip_item_command))
-    application.add_handler(CommandHandler("卸下", unequip_item_command))
-    application.add_handler(CommandHandler("强化", enhance_equipment_command))
-    application.add_handler(CommandHandler("确认强化", confirm_enhance_command))
-    application.add_handler(CommandHandler("装备详情", equipment_detail_command))
-    application.add_handler(CommandHandler("套装效果", set_bonus_command))
+    application.add_handler(MessageHandler(filters.Regex(r"^\.背包"), inventory_command))
+    application.add_handler(MessageHandler(filters.Regex(r"^\.使用"), use_item_command))
+    application.add_handler(MessageHandler(filters.Regex(r"^\.装备"), equip_item_command))
+    application.add_handler(MessageHandler(filters.Regex(r"^\.卸下"), unequip_item_command))
+    application.add_handler(MessageHandler(filters.Regex(r"^\.强化"), enhance_equipment_command))
+    application.add_handler(MessageHandler(filters.Regex(r"^\.确认强化"), confirm_enhance_command))
+    application.add_handler(MessageHandler(filters.Regex(r"^\.装备详情"), equipment_detail_command))
+    application.add_handler(MessageHandler(filters.Regex(r"^\.套装效果"), set_bonus_command))

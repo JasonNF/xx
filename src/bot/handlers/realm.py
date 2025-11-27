@@ -1,6 +1,6 @@
 """秘境探索handlers - 凡人修仙传版本"""
 from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup
-from telegram.ext import ContextTypes, CommandHandler, CallbackQueryHandler
+from telegram.ext import MessageHandler, filters, ContextTypes, CommandHandler, CallbackQueryHandler
 
 from bot.models.database import AsyncSessionLocal
 from bot.models import Player, SecretRealm
@@ -156,5 +156,5 @@ async def explore_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 def register_handlers(application):
     """注册秘境相关处理器"""
-    application.add_handler(CommandHandler("秘境", realms_command))
-    application.add_handler(CommandHandler("探索", explore_command))
+    application.add_handler(MessageHandler(filters.Regex(r"^\.秘境"), realms_command))
+    application.add_handler(MessageHandler(filters.Regex(r"^\.探索"), explore_command))

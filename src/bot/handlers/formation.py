@@ -1,6 +1,6 @@
 """阵法系统handlers"""
 from telegram import Update
-from telegram.ext import ContextTypes, CommandHandler
+from telegram.ext import MessageHandler, filters, ContextTypes, CommandHandler
 
 from bot.models.database import AsyncSessionLocal
 from bot.models import Player
@@ -435,11 +435,11 @@ async def nearby_formations_command(update: Update, context: ContextTypes.DEFAUL
 
 def register_handlers(application):
     """注册阵法相关处理器"""
-    application.add_handler(CommandHandler("阵法", formation_list_command))
-    application.add_handler(CommandHandler("阵法图谱", formation_codex_command))
-    application.add_handler(CommandHandler("学习阵法", learn_formation_command))
-    application.add_handler(CommandHandler("布阵", deploy_formation_command))
-    application.add_handler(CommandHandler("撤阵", dismiss_formation_command))
-    application.add_handler(CommandHandler("当前阵法", current_formation_command))
-    application.add_handler(CommandHandler("破阵", break_formation_command))
-    application.add_handler(CommandHandler("附近阵法", nearby_formations_command))
+    application.add_handler(MessageHandler(filters.Regex(r"^\.阵法"), formation_list_command))
+    application.add_handler(MessageHandler(filters.Regex(r"^\.阵法图谱"), formation_codex_command))
+    application.add_handler(MessageHandler(filters.Regex(r"^\.学习阵法"), learn_formation_command))
+    application.add_handler(MessageHandler(filters.Regex(r"^\.布阵"), deploy_formation_command))
+    application.add_handler(MessageHandler(filters.Regex(r"^\.撤阵"), dismiss_formation_command))
+    application.add_handler(MessageHandler(filters.Regex(r"^\.当前阵法"), current_formation_command))
+    application.add_handler(MessageHandler(filters.Regex(r"^\.破阵"), break_formation_command))
+    application.add_handler(MessageHandler(filters.Regex(r"^\.附近阵法"), nearby_formations_command))

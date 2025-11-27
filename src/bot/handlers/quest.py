@@ -3,7 +3,7 @@ import json
 from datetime import datetime, timedelta
 
 from telegram import Update
-from telegram.ext import ContextTypes, CommandHandler
+from telegram.ext import MessageHandler, filters, ContextTypes, CommandHandler
 
 from bot.models.database import AsyncSessionLocal
 from bot.models import Player, Quest, PlayerQuest, QuestType, QuestStatus
@@ -451,6 +451,6 @@ async def complete_quest_command(update: Update, context: ContextTypes.DEFAULT_T
 
 def register_handlers(application):
     """注册任务相关处理器"""
-    application.add_handler(CommandHandler("任务", quests_command))
-    application.add_handler(CommandHandler("接取", accept_quest_command))
-    application.add_handler(CommandHandler("完成", complete_quest_command))
+    application.add_handler(MessageHandler(filters.Regex(r"^\.任务"), quests_command))
+    application.add_handler(MessageHandler(filters.Regex(r"^\.接取"), accept_quest_command))
+    application.add_handler(MessageHandler(filters.Regex(r"^\.完成"), complete_quest_command))
