@@ -4,7 +4,7 @@ import re
 from pathlib import Path
 
 # 复制验证函数和常量（避免导入整个handlers包）
-RENAME_COST = 100000
+RENAME_COST = 20000
 MIN_NAME_LENGTH = 2
 MAX_NAME_LENGTH = 10
 
@@ -39,8 +39,8 @@ def validate_nickname(nickname: str) -> tuple[bool, str]:
     return True, ""
 
 
-def test_nickname_validation():
-    """测试道号验证规则"""
+def run_validation_suite() -> bool:
+    """运行道号验证测试返回是否全部通过"""
 
     print("=" * 60)
     print("🧪 道号验证测试")
@@ -103,8 +103,13 @@ def test_nickname_validation():
     return failed == 0
 
 
+def test_nickname_validation():
+    """pytest 用例包装"""
+    assert run_validation_suite(), "部分改名校验用例失败"
+
+
 if __name__ == "__main__":
-    success = test_nickname_validation()
+    success = run_validation_suite()
 
     if success:
         print("✅ 所有验证测试通过！")

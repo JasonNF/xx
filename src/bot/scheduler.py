@@ -220,7 +220,7 @@ class GameScheduler:
                         penalty = min((days_since - 30) * 5, 50)  # 最多降低50
                         cave.spiritual_density = max(100, cave.spiritual_density - penalty)
                         logger.warning(
-                            f"玩家 {player.name} 的洞府超过30天未维护，"
+                            f"玩家 {player.nickname} 的洞府超过30天未维护，"
                             f"灵气浓度降低 {penalty} -> {cave.spiritual_density}"
                         )
 

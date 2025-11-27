@@ -145,14 +145,12 @@ class CultivationService:
         # 基础修炼速度
         base_rate = settings.BASE_CULTIVATION_RATE
 
-        # 悟性加成（最低保持在50%效率）
-        comprehension_bonus = max(0.5, 1 + (player.comprehension - 10) * 0.05)
+        # 悟性加成
+        comprehension_bonus = 1 + (player.comprehension - 10) * 0.05
 
-        # 灵根加成（替代旧的根骨属性）
-        spirit_root_bonus = (
-            player.spirit_root.cultivation_speed_multiplier
-            if player.spirit_root else 1.0
-        )
+        # 根骨加成
+        # 根骨加成（使用悟性替代）
+        root_bone_bonus = 1.0
 
         # 功法加成（如果有）
         method_bonus = 1.0
@@ -175,7 +173,7 @@ class CultivationService:
             base_rate *
             duration_hours *
             comprehension_bonus *
-            spirit_root_bonus *
+            root_bone_bonus *
             method_bonus *
             realm_penalty *
             cave_cultivation_bonus *

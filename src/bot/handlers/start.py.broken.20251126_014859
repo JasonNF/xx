@@ -1,0 +1,240 @@
+"""开始和基础命令处理器"""
+from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup
+from telegram.ext import ContextTypes, CommandHandler, CallbackQueryHandler
+
+from bot.models import get_db
+from bot.services.player_service import PlayerService
+from bot.services.spirit_root_service import SpiritRootService
+from bot.config import settings
+
+
+async def detect_spirit_root_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    """处理 /检测灵根 命令 - 开始游戏"""
+    user = update.effective_user
+
+    async with get_db() as db:
+        player, is_new = await PlayerService.get_or_create_player(
+            db,
+            telegram_id=user.id,
+            username=user.username,
+            first_name=user.first_name
+        )
+
+        if is_new:
+            # 新玩家 - 灵根检测成功
+            # 获取灵根信息
+            spirit_root = player.spirit_root
+            if spirit_root:
+                spirit_root_desc = SpiritRootService.get_root_description(spirit_root)
+                spirit_root_comment = SpiritRootService.get_root_comment(spirit_root)
+            else:
+                spirit_root_desc = "未知（检测失败）"
+                spirit_root_comment = ""
+
+            welcome_text = f"""
+✨ 灵根检测完成！
+
+恭喜你，{player.nickname}！你拥有修仙资质！
+
+━━━━━━━━━━━━━━━
+👤 道号：{player.nickname}
+🌈 灵根：{spirit_root_desc}
+💎 纯度：{spirit_root.purity}%
+⚡ 修炼速度：{spirit_root.cultivation_speed_multiplier:.2f}x
+🌟 初始境界：{player.full_realm_name}
+💎 初始灵石：{player.spirit_stones:,}
+━━━━━━━━━━━━━━━
+
+{spirit_root_comment}
+
+🎁 新手福利已发放！
+
+📖 你的修仙之旅就此开始...
+
+💡 快速开始：
+🧘 /修炼 - 开始修炼提升境界
+⚔️ /历练 - 外出历练获取资源
+📊 /状态 - 查看详细角色信息
+📖 /帮助 - 查看完整游戏指南
+"""
+        else:
+            # 老玩家 - 显示当前状态
+            spirit_root = player.spirit_root
+            if spirit_root:
+                spirit_root_desc = SpiritRootService.get_root_description(spirit_root)
+                spirit_root_line = f"🌈 灵根：{spirit_root_desc}\n"
+            else:
+                spirit_root_line = ""
+
+            welcome_text = f"""
+🔮 灵根共鸣...
+
+{player.nickname}，你已踏入修仙之路
+
+━━━━━━━━━━━━━━━
+{spirit_root_line}🌟 当前境界：{player.full_realm_name}
+⚡ 战力：{player.combat_power}
+💎 灵石：{player.spirit_stones:,}
+━━━━━━━━━━━━━━━
+
+📖 使用 /帮助 查看所有命令
+📊 使用 /状态 查看详细信息
+"""
+
+        # 创建快捷菜单
+        keyboard = [
+            [
+                InlineKeyboardButton("📊 角色状态", callback_data="status"),
+                InlineKeyboardButton("🧘 开始修炼", callback_data="cultivate"),
+            ],
+            [
+                InlineKeyboardButton("⚔️ 战斗", callback_data="battle"),
+                InlineKeyboardButton("🏪 商店", callback_data="shop"),
+            ],
+            [
+                InlineKeyboardButton("🏛️ 宗门", callback_data="sect"),
+                InlineKeyboardButton("📖 帮助", callback_data="help"),
+            ],
+        ]
+        reply_markup = InlineKeyboardMarkup(keyboard)
+
+        await send_and_delete(update.message, 
+            welcome_text,
+            parse_mode="Markdown"
+        )
+
+
+async def help_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    """处理 /帮助 命令"""
+    help_text = f"""
+📖 **{settings.GAME_NAME} - 游戏指南**
+
+**🎮 基础命令**
+/检测灵根 - 开始游戏/查看角色
+/状态 - 查看详细角色状态
+/改名 <新道号> - 修改道号（终生一次，10万灵石）
+/改名状态 - 查看改名状态
+/帮助 - 显示此帮助信息
+
+**🧘 修炼系统**
+/修炼 [小时] - 开始修炼
+/结算 - 完成修炼收取修为
+/取消 - 取消当前修炼
+/突破 - 尝试突破境界
+/灵根 - 检测灵根
+
+**⚔️ 战斗系统**
+/战斗 [怪物名] - 挑战怪物(PVE)
+/切磋 - 挑战其他玩家(回复使用)
+/技能 - 查看已学技能
+/学习 [技能名] - 学习新技能
+/升级 [技能名] - 升级技能
+/施法 [技能名] - 测试技能
+
+**🏛️ 秘境系统**
+/秘境 - 查看可用秘境
+/探索 [秘境名] - 进入秘境探索
+
+**📋 任务系统**
+/任务 [类型] - 查看任务列表
+/接取 [任务ID] - 接取任务
+/完成 [任务ID] - 完成任务
+
+**💰 积分商城**
+/积分商城 或 /商城 - 浏览商城商品
+/我的积分 - 查看积分余额和记录
+
+**💡 提示**
+• 修炼是获得修为的主要方式
+• 探索秘境获得稀有物品
+• 学习技能提升战斗力
+• 战斗前请确保生命值充足
+• 积分可通过签到、任务、PVP等途径获得
+"""
+
+    await send_and_delete(update.message, help_text, parse_mode="Markdown")
+
+
+async def status_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    """处理 /状态 命令 - 显示玩家当前状态"""
+    user = update.effective_user
+
+    async with get_db() as db:
+        result = await db.execute(
+            select(Player)
+            .where(Player.telegram_id == user.id)
+            .options(selectinload(Player.spirit_root))
+        )
+        player = result.scalar_one_or_none()
+
+        if not player:
+            await send_and_delete(update.message, 
+                "❌ 你还没有开始修仙之旅
+"
+                "请先使用 /start 命令检测灵根"
+            )
+            return
+
+        # 计算修为进度
+        progress = (player.cultivation_exp / player.next_realm_exp) * 100
+        progress_bar = "█" * int(progress / 10) + "░" * (10 - int(progress / 10))
+
+        status_text = f"""
+👤 **{player.nickname}**
+
+🌟 **境界**: {player.full_realm_name}
+📊 **修为**: {player.cultivation_exp:,}/{player.next_realm_exp:,}
+▰ {progress_bar} {progress:.1f}%
+
+💚 **生命**: {player.hp}/{player.max_hp}
+💙 **灵力**: {player.spiritual_power}/{player.max_spiritual_power}
+
+⚔️ **�击击**: {player.attack}
+🛡️ **防御**: {player.defense}
+⚡ **速度**: {player.speed}
+💥 **暴击率**: {player.crit_rate * 100:.1f}%
+💥 **暴击伤害**: {player.crit_damage:.1f}x
+
+🧠 **悟性**: {player.comprehension}
+💎 **灵石**: {player.spirit_stones:,}
+
+⏳ **年龄/寿元**: {player.age}/{player.lifespan}
+"""
+
+        # 如果有灵根信息
+        if player.spirit_root:
+            from bot.services.spirit_root_service import SpiritRootService
+            spirit_root_desc = SpiritRootService.get_root_description(player.spirit_root)
+            status_text += f"
+🌈 **灵根**: {spirit_root_desc}
+"
+            status_text += f"💎 **纯度**: {player.spirit_root.purity}%
+"
+
+        # 如果有宗门
+        if player.sect_id:
+            status_text += f"
+🏛️ **宗门贡献**: {player.contribution:,}
+"
+
+        # 如果是结丹期以上，显示金丹品质
+        if player.golden_core_quality > 0:
+            status_text += f"
+⚗️ **金丹品质**: {player.golden_core_quality}品
+"
+
+        await send_and_delete(update.message, status_text, parse_mode="Markdown")
+
+
+# 注册处理器的函数
+def register_handlers(application):
+    """注册所有处理器"""
+    import logging
+    logger = logging.getLogger(__name__)
+    logger.info("start.register_handlers 被调用")
+    
+    application.add_handler(CommandHandler("start", detect_spirit_root_command))
+    application.add_handler(CommandHandler("help", help_command))
+    application.add_handler(CommandHandler("info", status_command))
+    
+    logger.info("✅ start handlers已注册: /start, /help, /info")

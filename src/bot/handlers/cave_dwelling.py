@@ -124,7 +124,7 @@ async def buy_cave_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
         # 创建洞府
         cave = CaveDwelling(
             player_id=player.id,
-            name=f"{player.name}的洞府",
+            name=f"{player.nickname}的洞府",
             location=location,
             grade=CaveDwellingGrade.ORDINARY.value,
             level=1,

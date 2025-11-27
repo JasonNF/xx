@@ -95,7 +95,7 @@ class CoreQualityService:
         base_success_rate = 0.5
 
         # 修为影响（修为越高成功率越高，最多+20%）
-        cultivation_bonus = min(player.cultivation / 1000000, 0.2)
+        cultivation_bonus = min(player.cultivation_exp / 1000000, 0.2)
 
         # 悟性影响（最多+15%）
         comprehension_bonus = player.comprehension * 0.0015
@@ -162,7 +162,7 @@ class CoreQualityService:
                 player_id=player.id,
                 quality=quality,
                 grade=grade.value,
-                formation_cultivation=player.cultivation,
+                formation_cultivation=player.cultivation_exp,
                 pill_quality=pill_quality,
                 cultivation_speed_bonus=bonuses["cultivation_speed_bonus"],
                 attack_bonus=bonuses["attack_bonus"],
@@ -221,7 +221,7 @@ class CoreQualityService:
 
         # 1. 修为影响（最高30分）
         # 假设筑基期满修为是500万
-        cultivation_score = min(player.cultivation / 5000000 * 30, 30)
+        cultivation_score = min(player.cultivation_exp / 5000000 * 30, 30)
         quality += int(cultivation_score)
 
         # 2. 丹药品质（最高30分）

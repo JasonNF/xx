@@ -246,7 +246,7 @@ BOSS状态:
             player = result.scalar_one_or_none()
             if player:
                 player.spirit_stones += participation.reward_stones
-                player.exp += participation.reward_exp
+                player.cultivation_exp += participation.reward_exp
 
         await db.commit()
 

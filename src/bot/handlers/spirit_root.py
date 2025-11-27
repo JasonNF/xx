@@ -1,11 +1,12 @@
 """灵根检测 - 凡人修仙传核心机制"""
 from telegram import Update
 from telegram.ext import MessageHandler, filters, ContextTypes, CommandHandler
+from sqlalchemy import select
+from sqlalchemy.orm import selectinload
 
 from bot.models.database import AsyncSessionLocal
 from bot.models.player import Player
 from bot.services.spirit_root_service import SpiritRootService
-from sqlalchemy import select
 
 
 async def test_root_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -13,9 +14,11 @@ async def test_root_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user = update.effective_user
 
     async with AsyncSessionLocal() as session:
-        # 检查玩家是否已存在
+        # 检查玩家是否已存在，预加载spirit_root关系
         result = await session.execute(
-            select(Player).where(Player.telegram_id == user.id)
+            select(Player)
+            .where(Player.telegram_id == user.id)
+            .options(selectinload(Player.spirit_root))
         )
         player = result.scalar_one_or_none()
 

@@ -229,7 +229,7 @@ async def finish_exploration_command(update: Update, context: ContextTypes.DEFAU
             # 未触发奇遇，给予普通奖励
             base_exp = exploration.duration_hours * 100
             exploration.exp_gained = base_exp
-            player.exp += base_exp
+            player.cultivation_exp += base_exp
 
             text += f"\n未发现特殊奇遇\n"
             text += f"📚 获得修为：{base_exp}"
@@ -342,7 +342,7 @@ async def complete_adventure_command(update: Update, context: ContextTypes.DEFAU
                 value = reward.get("value")
 
                 if reward_type == "exp":
-                    player.exp += value
+                    player.cultivation_exp += value
                     reward_texts.append(f"📚 修为 +{value}")
                 elif reward_type == "stones":
                     player.spirit_stones += value

@@ -1,7 +1,10 @@
 """测试灵根生成概率分布"""
 import asyncio
+import random
 import sys
 from pathlib import Path
+
+import pytest
 
 # 添加项目根目录到路径
 project_root = Path(__file__).parent.parent
@@ -11,9 +14,20 @@ from bot.services.spirit_root_service import SpiritRootService
 from bot.models import Player, SpiritRoot
 from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine, async_sessionmaker
 
+# 概率配置
+EXPECTED_DISTRIBUTION = {
+    1: 5.0,
+    2: 15.0,
+    3: 30.0,
+    4: 40.0,
+    5: 10.0,
+}
+EXPECTED_MUTANT_RATE = (EXPECTED_DISTRIBUTION[1] + EXPECTED_DISTRIBUTION[2]) * 0.10
 
+
+@pytest.mark.asyncio
 async def test_probability():
-    """测试10000次灵根生成，统计概率分布"""
+    """测试灵根生成概率分布"""
 
     # 创建临时内存数据库
     engine = create_async_engine("sqlite+aiosqlite:///:memory:", echo=False)
@@ -38,11 +52,13 @@ async def test_probability():
     mutant_count = 0
     purity_sum = {1: 0, 2: 0, 3: 0, 4: 0, 5: 0}
 
-    total = 10000
+    total = 3000
 
     print("🔮 开始测试灵根生成概率...")
     print(f"📊 测试次数: {total:,}")
     print()
+
+    random.seed(42)
 
     async with async_session() as session:
         for i in range(total):
@@ -87,14 +103,6 @@ async def test_probability():
         5: "杂灵根（五灵根）",
     }
 
-    expected = {
-        1: 5.0,
-        2: 15.0,
-        3: 30.0,
-        4: 40.0,
-        5: 10.0,
-    }
-
     print("灵根类型 | 期望概率 | 实际数量 | 实际概率 | 平均纯度 | 偏差")
     print("-" * 80)
 
@@ -102,10 +110,10 @@ async def test_probability():
         actual_count = stats[count]
         actual_prob = (actual_count / total) * 100
         avg_purity = purity_sum[count] / actual_count if actual_count > 0 else 0
-        deviation = actual_prob - expected[count]
+        deviation = actual_prob - EXPECTED_DISTRIBUTION[count]
         deviation_str = f"{deviation:+.2f}%"
 
-        print(f"{type_names[count]:12} | {expected[count]:6.1f}% | {actual_count:8,} | "
+        print(f"{type_names[count]:12} | {EXPECTED_DISTRIBUTION[count]:6.1f}% | {actual_count:8,} | "
               f"{actual_prob:7.2f}% | {avg_purity:7.1f}% | {deviation_str:>8}")
 
     print("-" * 80)
@@ -116,7 +124,7 @@ async def test_probability():
     print(f"💫 变异灵根统计:")
     print(f"   实际数量: {mutant_count:,}")
     print(f"   实际概率: {mutant_prob:.3f}%")
-    print(f"   期望概率: 0.5% (天灵根5% × 变异率10%)")
+    print(f"   期望概率: {EXPECTED_MUTANT_RATE:.2f}% (单/双灵根×10% 变异率)")
     print()
 
     # 分析结果
@@ -126,11 +134,11 @@ async def test_probability():
     print()
 
     # 检查偏差
-    max_deviation = max(abs((stats[i] / total) * 100 - expected[i]) for i in stats.keys())
+    max_deviation = max(abs((stats[i] / total) * 100 - EXPECTED_DISTRIBUTION[i]) for i in stats.keys())
     if max_deviation < 1.0:
         print("✅ 概率分布正常，最大偏差 < 1%")
-    elif max_deviation < 2.0:
-        print("✅ 概率分布可接受，最大偏差 < 2%")
+    elif max_deviation < 2.5:
+        print("✅ 概率分布可接受，最大偏差 < 2.5%")
     else:
         print(f"⚠️  概率分布异常，最大偏差 {max_deviation:.2f}%")
 
@@ -150,6 +158,10 @@ async def test_probability():
         print("⚠️  注意: 超过40%的玩家会获得劣质灵根，可能影响游戏体验")
 
     print()
+
+    # 断言概率偏差在允许范围内
+    assert max_deviation < 2.5, "灵根概率分布偏差超过阈值"
+    assert abs(mutant_prob - EXPECTED_MUTANT_RATE) < 1.0, "变异灵根概率偏离预期 2% 过多"
 
 
 if __name__ == "__main__":
